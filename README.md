@@ -42,7 +42,7 @@ Following is the output of `ls /proc/1/`:
 
 ![Screenshot from 2024-04-22 17-29-47](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/5a3a8595-7431-40a8-aeb5-dc6ff72012a2)
 
-- `cmdline`: This read-only file holds the  complete  command  line  for  the
+- **`cmdline`**: This read-only file holds the  complete  command  line  for  the
 process,  unless  the  process is a zombie.  In the latter case,
 there is nothing in this file: that is, a read on this file will
 return  0 characters.  The command-line arguments appear in this
@@ -59,8 +59,10 @@ file refers via prctl(2) operations such as PR_SET_MM_ARG_START.
 Think of this file as the command line that  the  process  wants
 you to see.
 
+![Screenshot from 2024-04-22 17-30-57](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/40f51e5d-6a59-43e2-b959-64265c1039d5)
 
-- `environ`: This file contains the initial environment that was set when the
+
+- **`environ`**: This file contains the initial environment that was set when the
 currently executing program was started via execve(2).  The  en‐
 tries  are  separated  by  null bytes ('\0'), and there may be a
 null byte at the end.  Thus, to print  out  the  environment  of
@@ -79,8 +81,10 @@ file refers via prctl(2) operations such as PR_SET_MM_ENV_START.
 Permission  to  access  this file is governed by a ptrace access
 mode PTRACE_MODE_READ_FSCREDS check; see ptrace(2).
 
+![Screenshot from 2024-04-22 17-31-34](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/dfb968d0-7299-4c99-ac2c-2d9f2327cb7d)
 
-- `stat`: Status information about the process.  This is  used  by  ps(1).
+
+- **`stat`**: Status information about the process.  This is  used  by  ps(1).
 It is defined in the kernel source file fs/proc/array.c.
 
 The  fields,  in order, with their proper scanf(3) format speci‐
@@ -92,8 +96,13 @@ displayed as 0.  The affected  fields  are  indicated  with  the
 marking [PT].
 
 
+![Screenshot from 2024-04-22 17-31-55](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c6917423-1110-4954-8c82-b4351243b82c)
+
 - `status`: Provides  much  of  the  information  in  /proc/[pid]/stat   and
 /proc/[pid]/statm in a format that's easier for humans to parse.
+
+![Screenshot from 2024-04-22 17-32-41](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c8d73e40-b846-4566-8159-26a58aced454)
+![Screenshot from 2024-04-22 17-32-53](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/ff8ec82e-db80-429a-ba54-2a7539dd6905)
 
 - `statm`: Provides information about memory usage, measured in pages.  The
 columns are:
@@ -116,6 +125,7 @@ scalability optimization.  If accurate values are required,  use
 /proc/[pid]/smaps or /proc/[pid]/smaps_rollup instead, which are
 much slower but provide accurate, detailed information.
 
+![Screenshot from 2024-04-22 17-33-47](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/132476c5-33ce-428b-80fd-0473bd431296)
 
 - `cwd`: This  is a symbolic link to the current working directory of the
 process.  To find out the current working directory  of  process
@@ -130,6 +140,8 @@ are not available if the  main  thread  has  already  terminated
 Permission  to  dereference  or read (readlink(2)) this symbolic
 link is governed by a ptrace  access  mode  PTRACE_MODE_READ_FS‐
 CREDS check; see ptrace(2).
+
+![Screenshot from 2024-04-22 17-34-19](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/6abf7334-695c-44d9-81ce-f9219b3e80af)
 
 
 - `exe`: Under Linux 2.2 and later, this file is a symbolic link contain‐
@@ -159,6 +171,8 @@ For example, [0301]:1502 would be inode 1502 on device major  03
 drive).
 
 find(1) with the -inum option can be used to locate the file.
+
+![Screenshot from 2024-04-22 17-35-43](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/cc156ca6-69b5-46bf-acfe-89ea741222df)
 
 
 - `root`: UNIX  and  Linux  support  the idea of a per-process root of the
@@ -206,5 +220,11 @@ CREDS check; see ptrace(2).
 
 
 
+![Screenshot from 2024-04-22 17-36-17](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/e0e18287-2b96-46c6-a60d-16e70c5f8966)
 
+
+Let's take a look at two directories inside the `/proc/1/root/`:
+
+![Screenshot from 2024-04-22 17-36-56](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/22f7064e-0939-4e4b-b7b1-328997860267)
+![Screenshot from 2024-04-22 17-37-54](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c5091a9c-2d0b-4107-b8d6-eda669b02651)
 
