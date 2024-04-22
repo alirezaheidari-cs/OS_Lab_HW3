@@ -228,3 +228,346 @@ Let's take a look at two directories inside the `/proc/1/root/`:
 ![Screenshot from 2024-04-22 17-36-56](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/22f7064e-0939-4e4b-b7b1-328997860267)
 ![Screenshot from 2024-04-22 17-37-54](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c5091a9c-2d0b-4107-b8d6-eda669b02651)
 
+
+Following is a bash code that displays all running processes:
+
+![Screenshot from 2024-04-22 17-43-41](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/06a5d8ba-d7ef-4229-b68f-6da957d627b8)
+
+Output:
+
+![Screenshot from 2024-04-22 17-42-48](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/6b310d9b-c1ef-4bed-8ae9-623733529680)
+
+**Excesize 3.1**
+
+```
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <vector>
+#include <cstdlib>
+#include <cstring>
+#include <dirent.h>
+
+using namespace std;
+
+void printGeneralProcessInfo(string pid_str) {
+    int pid = stoi(pid_str);
+
+    string path = "/proc/" + to_string(pid) + "/";
+    string cmdline, status;
+    ifstream cmdFile(path + "cmdline");
+    getline(cmdFile, cmdline);
+    cmdFile.close();
+    ifstream statusFile(path + "status");
+    while (getline(statusFile, status)) {
+        cout << status << endl;
+    }
+    statusFile.close();
+    cout << "Command Line: " << cmdline << endl;
+}
+
+void printStatInfo(const std::string& path) {
+    std::ifstream file(path + "/stat");
+    std::string content;
+    if (getline(file, content)) {
+        std::istringstream iss(content);
+        std::vector<std::string> stats;
+        std::string token;
+        while (iss >> token) {
+            stats.push_back(token);
+        }
+        if (stats.size() > 22) {
+            std::cout << "Process State: " << stats[2] << std::endl;
+            std::cout << "User Time: " << stats[13] << std::endl;
+            std::cout << "System Time: " << stats[14] << std::endl;
+            std::cout << "Nice Value: " << stats[18] << std::endl;
+            std::cout << "Number of Threads: " << stats[19] << std::endl;
+            std::cout << "Start Time (relative to system boot): " << stats[21] << std::endl;
+        }
+    } else {
+        std::cout << "Error reading stat file." << std::endl;
+    }
+    file.close();
+}
+
+void listOpenFiles(const std::string& path) {
+    std::string fdPath = path + "/fd/";
+    DIR* dir = opendir(fdPath.c_str());
+    if (dir != nullptr) {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            if (entry->d_type == DT_LNK) {
+                std::string fdLink = fdPath + entry->d_name;
+                char target[1024];
+                ssize_t len = readlink(fdLink.c_str(), target, sizeof(target) - 1);
+                if (len != -1) {
+                    target[len] = '\0';
+                    std::cout << "Open file: " << target << std::endl;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cout << "Error opening fd directory." << std::endl;
+    }
+}
+
+void printProcessInfo(const std::string& pid) {
+    std::string path = "/proc/" + pid;
+    std::ifstream file;
+
+    char exeLink[1024] = {0};
+    ssize_t len = readlink((path + "/exe").c_str(), exeLink, sizeof(exeLink) - 1);
+    if (len != -1) {
+        exeLink[len] = '\0';
+        std::cout << "Executable Path: " << exeLink << std::endl;
+    } else {
+        std::cout << "Error reading link: " << strerror(errno) << std::endl;
+    }
+
+    file.open(path + "/statm");
+    std::string mem;
+    if (getline(file, mem)) {
+        std::istringstream iss(mem);
+        std::string total;
+        iss >> total;
+        int totalMemoryKb = std::stoi(total) * (sysconf(_SC_PAGESIZE) / 1024);
+        std::cout << "Total Program Size: " << totalMemoryKb << " KB" << std::endl;
+    } else {
+        std::cout << "Error reading memory usage" << std::endl;
+    }
+    file.close();
+
+    printStatInfo(path);
+
+    file.open(path + "/environ");
+    std::string env;
+    std::cout << "Environment Variables:" << std::endl;
+    bool isEmpty = true;
+    while (getline(file, env, '\0')) {
+        std::cout << env << std::endl;
+        isEmpty = false;
+    }
+    if (isEmpty) {
+        std::cout << "No environment variables found or error reading them." << std::endl;
+    }
+    file.close();
+    listOpenFiles(path);
+}
+
+int main() {
+    std::string pid;
+    std::cout << "Enter Process ID: ";
+    std::cin >> pid;
+    printGeneralProcessInfo(pid);
+    printProcessInfo(pid);
+    return 0;
+}
+```
+
+Output for ProcessId of 1 (systemd):
+
+```
+Enter Process ID: 1
+Name:   systemd
+Umask:  0000
+State:  S (sleeping)
+Tgid:   1
+Ngid:   0
+Pid:    1
+PPid:   0
+TracerPid:      0
+Uid:    0       0       0       0
+Gid:    0       0       0       0
+FDSize: 512
+Groups:  
+NStgid: 1
+NSpid:  1
+NSpgid: 1
+NSsid:  1
+Kthread:        0
+VmPeak:   234144 kB
+VmSize:   168576 kB
+VmLck:         0 kB
+VmPin:         0 kB
+VmHWM:     12880 kB
+VmRSS:     12880 kB
+RssAnon:            4864 kB
+RssFile:            8016 kB
+RssShmem:              0 kB
+VmData:    21696 kB
+VmStk:       132 kB
+VmExe:       896 kB
+VmLib:      9056 kB
+VmPTE:        96 kB
+VmSwap:        0 kB
+HugetlbPages:          0 kB
+CoreDumping:    0
+THP_enabled:    1
+untag_mask:     0xffffffffffffffff
+Threads:        1
+SigQ:   2/60616
+SigPnd: 0000000000000000
+ShdPnd: 0000000000000000
+SigBlk: 7be3c0fe28014a03
+SigIgn: 0000000000001000
+SigCgt: 00000001000004ec
+CapInh: 0000000000000000
+CapPrm: 000001ffffffffff
+CapEff: 000001ffffffffff
+CapBnd: 000001ffffffffff
+CapAmb: 0000000000000000
+NoNewPrivs:     0
+Seccomp:        0
+Seccomp_filters:        0
+Speculation_Store_Bypass:       thread vulnerable
+SpeculationIndirectBranch:      conditional enabled
+Cpus_allowed:   ffff
+Cpus_allowed_list:      0-15
+Mems_allowed:   00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:      0
+voluntary_ctxt_switches:        8204
+nonvoluntary_ctxt_switches:     611
+Command Line: /sbin/initsplash
+Error reading link: Permission denied
+Total Program Size: 168576 KB
+Process State: S
+User Time: 82
+System Time: 146
+Nice Value: 0
+Number of Threads: 1
+Start Time (relative to system boot): 11
+Environment Variables:
+No environment variables found or error reading them.
+Error opening fd directory.
+```
+
+
+Output (Partially) for ProcessId of 13490 (chrome):
+
+```Open file: socket:[82005]
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlSoceng.store.4_13358277740592617
+Open file: socket:[115115]
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_alirezaheidari.atlassian.net_0.indexeddb.leveldb/MANIFEST-000001
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_alirezaheidari.atlassian.net_0.indexeddb.leveldb/001072.log
+Open file: /home/alireza/.config/google-chrome/Profile 1/heavy_ad_intervention_opt_out.db
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_alirezaheidari.atlassian.net_0.indexeddb.leveldb/001075.ldb
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/Encryption/LOCK
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_alirezaheidari.atlassian.net_0.indexeddb.leveldb/001079.ldb
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlMalware.store.4_13358277740892230
+Open file: socket:[76512]
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/Encryption/MANIFEST-000001
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_alirezaheidari.atlassian.net_0.indexeddb.leveldb/001076.ldb
+Open file: /home/alireza/.config/google-chrome/Profile 1/File System/Origins/LOG
+Open file: /home/alireza/.config/google-chrome/Profile 1/File System/Origins/LOCK
+Open file: socket:[122215]
+Open file: /home/alireza/.config/google-chrome/Profile 1/File System/Origins/MANIFEST-000001
+Open file: /home/alireza/.config/google-chrome/Profile 1/File System/Origins/000003.log
+Open file: socket:[122414]
+Open file: /home/alireza/.config/google-chrome/Profile 1/IndexedDB/https_mail.google.com_0.indexeddb.leveldb/001497.ldb
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/LOCK
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlUws.store.4_13358277740895195
+Open file: /home/alireza/.config/google-chrome/CrashpadMetrics-active.pma
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/LOG
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/MANIFEST-000001
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlBilling.store.4_13358277740897046
+Open file: socket:[114364]
+Open file: /home/alireza/.config/google-chrome/Profile 1/DIPS
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/000004.log
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/000005.ldb
+Open file: /home/alireza/.config/google-chrome/optimization_guide_model_store/26/E6DC4029A1E4B4C1/AD05485274DF05D5/model.tflite
+Open file: /home/alireza/.config/google-chrome/Profile 1/AggregationService
+Open file: /home/alireza/.config/google-chrome/ZxcvbnData/3/ranked_dicts
+Open file: /home/alireza/.config/google-chrome/Profile 1/Conversions
+Open file: /home/alireza/.config/google-chrome/optimization_guide_model_store/24/E6DC4029A1E4B4C1/567D3D8A6C2421CD/model.tflite
+Open file: /home/alireza/.config/google-chrome/Profile 1/Network Action Predictor
+Open file: /home/alireza/.config/google-chrome/Profile 1/Shortcuts
+Open file: /home/alireza/.config/google-chrome/Profile 1/DIPS-journal
+Open file: /dev/shm/.com.google.Chrome.duAfRj (deleted)
+Open file: /home/alireza/.config/google-chrome/optimization_guide_model_store/25/E6DC4029A1E4B4C1/41D135CABBD5B6AB/visual_model_desktop.tflite
+Open file: /home/alireza/.config/google-chrome/Profile 1/Managed Extension Settings/kbfnbcaeplbcioakkpcpgfkobkghlhen/LOG
+Open file: /home/alireza/.config/google-chrome/optimization_guide_model_store/34/E6DC4029A1E4B4C1/6D8DD33E20BBCA08/model.tflite
+Open file: /home/alireza/.config/google-chrome/Profile 1/BrowsingTopicsSiteData
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/Encryption/LOG
+Open file: socket:[110178]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Managed Extension Settings/kbfnbcaeplbcioakkpcpgfkobkghlhen/LOCK
+Open file: /home/alireza/.config/google-chrome/Profile 1/GCM Store/Encryption/000003.log
+Open file: /home/alireza/.config/google-chrome/Profile 1/Network Action Predictor-journal
+Open file: /home/alireza/.config/google-chrome/Profile 1/Managed Extension Settings/kbfnbcaeplbcioakkpcpgfkobkghlhen/000003.log
+Open file: /home/alireza/.config/google-chrome/optimization_guide_model_store/2/E6DC4029A1E4B4C1/288F43A16558D15B/model.tflite
+Open file: /home/alireza/.config/google-chrome/Profile 1/Managed Extension Settings/kbfnbcaeplbcioakkpcpgfkobkghlhen/MANIFEST-000001
+Open file: /home/alireza/.config/google-chrome/first_party_sets.db
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlMalBin.store.4_13358277740897948
+Open file: /home/alireza/.config/google-chrome/first_party_sets.db-journal
+Open file: /home/alireza/.config/google-chrome/Safe Browsing/UrlSubresourceFilter.store.4_13358277740911866
+Open file: socket:[130303]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn/057130.log
+Open file: /home/alireza/.config/google-chrome/Profile 1/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn/057131.ldb
+Open file: socket:[86080]
+Open file: socket:[124172]
+Open file: socket:[90847]
+Open file: socket:[130141]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Web Data-journal
+Open file: socket:[121794]
+Open file: socket:[128203]
+Open file: socket:[91156]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn/057127.ldb
+Open file: socket:[121738]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Shortcuts-journal
+Open file: socket:[121770]
+Open file: socket:[77720]
+Open file: /home/alireza/.config/google-chrome/Profile 1/SharedStorage-journal
+Open file: socket:[121826]
+Open file: socket:[115107]
+Open file: socket:[102466]
+Open file: socket:[76621]
+Open file: /home/alireza/.config/google-chrome/Profile 1/Sessions/Tabs_13358277473420975
+Open file: /home/alireza/.config/google-chrome/Profile 1/Login Data-journal
+Open file: socket:[97439]
+Open file: socket:[116534]
+Open file: socket:[128425]
+Open file: socket:[124197]
+Open file: socket:[100325]
+[1] + Done
+```
+
+## 3.3.4
+
+**/proc/meminfo**
+- **Purpose**: Provides detailed information about the system's memory usage, including total, free, available, used memory, and memory used for buffers and cache.
+- **Contents**: Includes fields like MemTotal, MemFree, MemAvailable, Buffers, Cached, etc., which are crucial for understanding the memory performance and capacity.
+**/proc/version**
+- **Purpose**: Shows the version of the Linux kernel, the name of the compiler used to build the kernel, and the compiler version.
+- **Contents**: Contains a single string that details the Linux kernel version, GCC version, and other build parameters.
+**/proc/uptime**
+- **Purpose**: Indicates how long the system has been on since it was last restarted.
+- **Contents**: Contains two numbers: the first is the total number of seconds the system has been up, and the second is how much of that time the machine has spent idle.
+**/proc/stat**
+- **Purpose**: Provides system-wide statistics.
+- **Contents**: Includes various pieces of information such as CPU usage times, boot time, number of processes created, and system interrupts.
+**/proc/mounts**
+- **Purpose**: Lists all the mounted filesystems currently used by the system.
+- **Contents**: Similar to the classic mounts command output, showing device, mount point, filesystem type, and mount options.
+**/proc/net**
+- **Purpose**: Contains various network-related information and statistics.
+- **Contents**: Includes files for different network protocols (e.g., netstat, dev, wireless), each providing specific data about the network operations.
+**/proc/loadavg**
+- **Purpose**: Shows the load average of the system.
+- **Contents**: Contains five numbers representing the 1, 5, and 15 minute load averages (how many processes are in the queue or running), total number of runnable entities, and the largest PID used.
+**/proc/interrupts**
+- **Purpose**: Displays the number of interrupts per CPU per I/O device.
+- **Contents**: Helps in diagnosing issues related to hardware interrupts and balancing between different CPUs.
+**/proc/ioports**
+- **Purpose**: Lists the range of I/O ports used by various devices connected to your computer.
+- **Contents**: Shows which I/O ports are in use and which process is using them, which is useful for diagnosing conflicts and system resource management.
+**/proc/filesystems**
+- **Purpose**: Lists all the file systems supported by the kernel.
+- **Contents**: Includes filesystem types that the kernel is configured to support, distinguishing between nodev (virtual filesystem) and device-backed filesystems.
+**/proc/cpuinfo**
+- **Purpose**: Provides detailed information about each CPU in the system.
+- **Contents**: Includes data like processor number, core ID, CPU family, model, model name, stepping, MHz, cache size, and flags.
+**/proc/cmdline**
+- **Purpose**: Shows the parameters passed to the Linux kernel at the time of boot.
+- **Contents**: A single string that lists all of the boot time parameters; useful for debugging and verifying system boot settings.
