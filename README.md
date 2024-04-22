@@ -1,6 +1,7 @@
 # OS_Lab_HW3
 
 Alireza Heidari: 98109731
+
 Hamidreza Yaghobi Araghi: 98109786
 
 
@@ -683,6 +684,7 @@ int main() {
 ```
 
 Output:
+
 ![image](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c5505d7a-80a9-43f8-b275-26a2a3fbdb73)
 
 **Exercise 3.2**
