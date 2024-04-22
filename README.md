@@ -593,3 +593,101 @@ Open file: socket:[100325]
 
 - **Purpose**: Shows the parameters passed to the Linux kernel at the time of boot.
 - **Contents**: A single string that lists all of the boot time parameters; useful for debugging and verifying system boot settings.
+
+**First C++ Program**
+
+```#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main() {
+    ifstream cpuinfo("/proc/cpuinfo");
+    string line;
+
+    if (!cpuinfo.is_open()) {
+        cerr << "Cannot open /proc/cpuinfo" << endl;
+        return 1;
+    }
+
+    string model_name, cpu_MHz, cache_size;
+    while (getline(cpuinfo, line)) {
+        if (line.substr(0, 10) == "model name") {
+            model_name = line.substr(line.find(':') + 2);
+        }
+        if (line.substr(0, 7) == "cpu MHz") {
+            cpu_MHz = line.substr(line.find(':') + 2);
+        }
+        // Specific handling for cache size to ensure we capture it correctly
+        size_t pos = line.find("cache size");
+        if (pos != string::npos) {
+            cache_size = line.substr(line.find(':') + 2);
+        }
+    }
+    cpuinfo.close();
+
+    cout << "Model Name: " << model_name << endl;
+    cout << "CPU MHz: " << cpu_MHz << " MHz" << endl;
+    cout << "Cache Size: " << cache_size << endl;
+
+    return 0;
+}
+```
+
+Output:
+
+![image](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/74f2bf4a-f571-4b5c-8038-bc1db2a7da6b)
+
+
+**Second C++ Program**
+
+```#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+int main() {
+    ifstream meminfo("/proc/meminfo");
+    string line;
+    long totalMem = 0, freeMem = 0, availableMem = 0;
+
+    if (!meminfo.is_open()) {
+        cerr << "Cannot open /proc/meminfo" << endl;
+        return 1;
+    }
+
+    while (getline(meminfo, line)) {
+        if (line.substr(0, 9) == "MemTotal:") {
+            istringstream(line.substr(line.find(':') + 1)) >> totalMem;
+        }
+        if (line.substr(0, 8) == "MemFree:") {
+            istringstream(line.substr(line.find(':') + 1)) >> freeMem;
+        }
+        if (line.substr(0, 14) == "MemAvailable:") {
+            istringstream(line.substr(line.find(':') + 1)) >> availableMem;
+        }
+    }
+    meminfo.close();
+
+    cout << "Total Memory: " << totalMem << " kB" << endl;
+    cout << "Used Memory: " << (totalMem - availableMem) << " kB" << endl;
+    cout << "Free Memory: " << freeMem << " kB" << endl;
+
+    return 0;
+}
+```
+
+Output:
+![image](https://github.com/alirezaheidari-cs/OS_Lab_HW3/assets/59364943/c5505d7a-80a9-43f8-b275-26a2a3fbdb73)
+
+**Exercise 3.2**
+
+- **sched_latency_ns**: Determines the amount of time a task will run before the scheduler checks if it should be switched out.
+- **sched_rt_period_us**: Defines the period size in microseconds for real-time scheduling.
+- **msgmnb**: Maximum size in bytes of a message queue.
+- **msgmax**: Maximum size in bytes of a single message in a message queue.
+- **threads-max**: Maximum number of threads that can be created system-wide.
+
+ **/proc/self**: It simply picks the currently-scheduled pid, i.e. the currently running process (on the current logical CPU). The effect is that `/proc/self` always points to the asking program's pid (`/proc/[current pid]`). In other words, `/proc/self` is a real symbolic link to the `/proc/` subdirectory of the process that is making the call.
+
