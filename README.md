@@ -534,40 +534,62 @@ Open file: socket:[100325]
 ```
 
 ## 3.3.4
-
 **/proc/meminfo**
+
 - **Purpose**: Provides detailed information about the system's memory usage, including total, free, available, used memory, and memory used for buffers and cache.
 - **Contents**: Includes fields like MemTotal, MemFree, MemAvailable, Buffers, Cached, etc., which are crucial for understanding the memory performance and capacity.
+
 **/proc/version**
+
 - **Purpose**: Shows the version of the Linux kernel, the name of the compiler used to build the kernel, and the compiler version.
 - **Contents**: Contains a single string that details the Linux kernel version, GCC version, and other build parameters.
+
 **/proc/uptime**
+
 - **Purpose**: Indicates how long the system has been on since it was last restarted.
 - **Contents**: Contains two numbers: the first is the total number of seconds the system has been up, and the second is how much of that time the machine has spent idle.
+
 **/proc/stat**
+
 - **Purpose**: Provides system-wide statistics.
 - **Contents**: Includes various pieces of information such as CPU usage times, boot time, number of processes created, and system interrupts.
+
 **/proc/mounts**
+
 - **Purpose**: Lists all the mounted filesystems currently used by the system.
 - **Contents**: Similar to the classic mounts command output, showing device, mount point, filesystem type, and mount options.
+
 **/proc/net**
+
 - **Purpose**: Contains various network-related information and statistics.
 - **Contents**: Includes files for different network protocols (e.g., netstat, dev, wireless), each providing specific data about the network operations.
+
 **/proc/loadavg**
+
 - **Purpose**: Shows the load average of the system.
 - **Contents**: Contains five numbers representing the 1, 5, and 15 minute load averages (how many processes are in the queue or running), total number of runnable entities, and the largest PID used.
+
 **/proc/interrupts**
+
 - **Purpose**: Displays the number of interrupts per CPU per I/O device.
 - **Contents**: Helps in diagnosing issues related to hardware interrupts and balancing between different CPUs.
+
 **/proc/ioports**
+
 - **Purpose**: Lists the range of I/O ports used by various devices connected to your computer.
 - **Contents**: Shows which I/O ports are in use and which process is using them, which is useful for diagnosing conflicts and system resource management.
+
 **/proc/filesystems**
+
 - **Purpose**: Lists all the file systems supported by the kernel.
 - **Contents**: Includes filesystem types that the kernel is configured to support, distinguishing between nodev (virtual filesystem) and device-backed filesystems.
+
 **/proc/cpuinfo**
+
 - **Purpose**: Provides detailed information about each CPU in the system.
 - **Contents**: Includes data like processor number, core ID, CPU family, model, model name, stepping, MHz, cache size, and flags.
+
 **/proc/cmdline**
+
 - **Purpose**: Shows the parameters passed to the Linux kernel at the time of boot.
 - **Contents**: A single string that lists all of the boot time parameters; useful for debugging and verifying system boot settings.
