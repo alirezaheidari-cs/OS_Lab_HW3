@@ -1,5 +1,9 @@
 # OS_Lab_HW3
 
+Alireza Heidari: 98109731
+Hamidreza Yaghobi Araghi: 98109786
+
+
 ## 3.3.1
 
 First we start our virtual linux:
